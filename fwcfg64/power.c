@@ -16,16 +16,6 @@
 #pragma alloc_text(PAGE, FwCfgEvtDeviceD0Exit)
 #endif
 
-VOID PutKdbg(PDEVICE_CONTEXT ctx)
-{
-    if (ctx->kdbg)
-    {
-        ExFreePool(ctx->kdbg);
-        ctx->kdbg = NULL;
-        VMCoreInfoSend(ctx);
-    }
-}
-
 NTSTATUS FwCfgEvtDeviceD0Exit(IN WDFDEVICE Device,
                              IN WDF_POWER_DEVICE_STATE TargetState)
 {
@@ -136,8 +126,9 @@ NTSTATUS FwCfgEvtDeviceReleaseHardware(IN WDFDEVICE Device,
     PAGED_CODE();
 
     ctx = GetDeviceContext(Device);
-
-    PutKdbg(ctx);
+    ctx->vmci_data.pVmci->guest_fmt = VMCOREINFO_FORMAT_NONE;
+    ctx->vmci_data.pVmci->size = 0;
+    VMCoreInfoSend(ctx);
 
     return STATUS_SUCCESS;
 }

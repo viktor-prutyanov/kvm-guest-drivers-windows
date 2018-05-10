@@ -13,6 +13,7 @@
 #pragma alloc_text(INIT, DriverEntry)
 #pragma alloc_text(PAGE, FwCfgEvtDeviceAdd)
 #pragma alloc_text(PAGE, FwCfgEvtDriverCleanup)
+#pragma alloc_text(PAGE, FwCfgEvtDeviceCleanup)
 #endif
 
 NTSTATUS VMCoreInfoFill(PDEVICE_CONTEXT ctx)
@@ -120,6 +121,20 @@ static VOID FwCfgContextInit(PDEVICE_CONTEXT ctx)
     ctx->dma_access_pa = pcbuf_data_pa + FIELD_OFFSET(CBUF_DATA, fwcfg_da);
 }
 
+VOID FwCfgEvtDeviceCleanup(IN WDFOBJECT DeviceObject)
+{
+    PDEVICE_CONTEXT ctx;
+
+    PAGED_CODE();
+
+    ctx = GetDeviceContext((WDFDEVICE)DeviceObject);
+
+    if (ctx->kdbg)
+    {
+        ExFreePool(ctx->kdbg);
+    }
+}
+
 NTSTATUS FwCfgEvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 {
     NTSTATUS status;
@@ -145,6 +160,7 @@ NTSTATUS FwCfgEvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, DEVICE_CONTEXT);
 
     status = WdfDeviceCreate(&DeviceInit, &attributes, &device);
+    attributes.EvtCleanupCallback = FwCfgEvtDeviceCleanup;
 
     if (!NT_SUCCESS(status))
     {

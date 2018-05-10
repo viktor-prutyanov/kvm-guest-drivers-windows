@@ -11,6 +11,7 @@
 #define ENTRY_NAME              "etc/vmcoreinfo"
 #define VMCI_ELF_NOTE_NAME      "VMCOREINFO"
 #define DUMP_TYPE_FULL          1
+#define VMCOREINFO_FORMAT_NONE  0x0
 #define VMCOREINFO_FORMAT_ELF   0x1
 #ifdef _AMD64_
     #define DUMP_HDR_SIZE                   (PAGE_SIZE * 2)
@@ -79,6 +80,7 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, GetDeviceContext);
 DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD FwCfgEvtDeviceAdd;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP _IRQL_requires_(PASSIVE_LEVEL) FwCfgEvtDriverCleanup;
+EVT_WDF_OBJECT_CONTEXT_CLEANUP _IRQL_requires_(PASSIVE_LEVEL) FwCfgEvtDeviceCleanup;
 
 EVT_WDF_DEVICE_PREPARE_HARDWARE FwCfgEvtDevicePrepareHardware;
 EVT_WDF_DEVICE_RELEASE_HARDWARE FwCfgEvtDeviceReleaseHardware;
